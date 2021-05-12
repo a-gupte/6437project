@@ -8,6 +8,7 @@ import unicodedata
 import numpy as np
 import csv
 from math import log
+from collections import Counter
 
 random.seed(42)
 
@@ -18,10 +19,16 @@ path_to_letter_probabilities = './data/letter_probabilities.csv'
 path_to_transition_probabilties = './data/letter_transition_matrix.csv'
 acceptance_rate_window = 50.0
 
+with open(path_to_letter_probabilities) as letter_prob_file:
+	letter_probabilities = list(csv.reader(letter_prob_file))[0]
+letter_probabilities = [float(prob) for prob in letter_probabilities]
+
+with open(path_to_transition_probabilties) as transition_file:
+	letter_transition_matrix = list(csv.reader(transition_file))
+letter_transition_matrix = [[float(prob) for prob in letter_transition_matrix[i]] for i in range(len(letter_transition_matrix))]
+
+
 def invert_cipher(ciphertext: str, cipherbet: list) -> str:
-	'''
-	tested
-	'''
 	CIPHERBET_LETTER_TO_ID = dict(map(reversed, enumerate(cipherbet)))
 	plaintext = "".join(ALPHABET[CIPHERBET_LETTER_TO_ID[c]] for c in ciphertext)
 	return plaintext
@@ -34,14 +41,6 @@ def sample_swap(cipherbet: list) -> list:
 
 
 def log_likelihood(ciphertext: str, cipherbet: list) -> float:
-	with open(path_to_letter_probabilities) as letter_prob_file:
-		letter_probabilities = list(csv.reader(letter_prob_file))[0]
-	letter_probabilities = [float(prob) for prob in letter_probabilities]
-
-	with open(path_to_transition_probabilties) as transition_file:
-		letter_transition_matrix = list(csv.reader(transition_file))
-	letter_transition_matrix = [[float(prob) for prob in letter_transition_matrix[i]] for i in range(len(letter_transition_matrix))]
-
 	plaintext = invert_cipher(ciphertext, cipherbet)
 	result = 0.0
 	for i, p in enumerate(plaintext):
@@ -54,10 +53,21 @@ def log_likelihood(ciphertext: str, cipherbet: list) -> float:
 			result += log(probability if probability != 0 else 0.000001, 10.0)
 	return result
 
+def intial_guess_heuristic(ciphertext: str) -> list:
+	sorted_letter_probabilites = sorted(ALPHABET, key = lambda a : letter_probabilities[LETTER_TO_IDX[a]])
+	count = Counter(ciphertext)
+	sorted_count =  sorted(count.keys(), key = lambda a : count[a])
+	sorted_count = list(set(ALPHABET).difference(sorted_count)) + sorted_count
+	cipherbet = [sorted_count[sorted_letter_probabilites.index(a)] for a in ALPHABET]
+	return cipherbet
+
 def metropolis_hastings(ciphertext: str, N: int) -> list:
 	# random initial cipher
-	cipherbet = ALPHABET.copy()
-	random.shuffle(cipherbet)
+	# cipherbet = ALPHABET.copy()
+	# random.shuffle(cipherbet)
+
+	# heuristic cipher depending on letter_probabilities and frequency counts
+	cipherbet = intial_guess_heuristic(ciphertext)
 
 	samples = [cipherbet]
 
@@ -119,7 +129,7 @@ def main():
 
 	with open('./data/sample/ciphertext.txt', 'r') as ciphertext_file:
 		ciphertext = ciphertext_file.read()
-		ciphertext = ciphertext.rstrip("\r\n")[:len(ciphertext)//4]
+		ciphertext = ciphertext.rstrip("\r\n")
 		ciphertext_file.close()
 
 	plaintext_part_1= decode(ciphertext, False)
