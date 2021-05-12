@@ -115,13 +115,19 @@ def decoding_accuracy(cipherbet: list) -> float:
 			result += 1
 	return result / len(plaintext)
 
-
-def decode(ciphertext: str, has_breakpoint: bool) -> str:
-	N = 7000
+def decode_single_ciphertext(ciphertext: str, N: int) -> str:
 	samples = metropolis_hastings(ciphertext, N)
 	map_estimate = max(samples, key = lambda sample : log_likelihood(ciphertext, sample))
 	plaintext = invert_cipher(ciphertext, map_estimate)
 	return plaintext
+
+def decode(ciphertext: str, has_breakpoint: bool) -> str:
+	N = 7000
+	if has_breakpoint:
+		for i in range(len(ciphertext)):
+			ciphertext1, ciphertext2 = ciphertext[:i], ciphertext[i:]
+			return decode_single_ciphertext(ciphertext1, N) + decode_single_ciphertext(ciphertext2, N)
+	return decode_single_ciphertext(ciphertext, N)
 
 def main():
 	# path_to_letter_probabilities = '../data/letter_probabilities.csv'
