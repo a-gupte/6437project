@@ -117,7 +117,7 @@ def decoding_accuracy(cipherbet: list) -> float:
 
 
 def decode(ciphertext: str, has_breakpoint: bool) -> str:
-	N = 2000
+	N = 7000
 	samples = metropolis_hastings(ciphertext, N)
 	map_estimate = max(samples, key = lambda sample : log_likelihood(ciphertext, sample))
 	plaintext = invert_cipher(ciphertext, map_estimate)
