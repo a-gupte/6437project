@@ -148,7 +148,7 @@ def metropolis_hastings(ciphertext: str, has_breakpoint: bool, N: int) -> list:
 		# 	acceptances = 0.0
 		previous_cipher = samples[-1]
 		bp_sample_window = len(ciphertext)//(n//100 + 1)//10
-		if n % 100 == 0 and has_breakpoint:
+		if n % 50 == 0 and has_breakpoint:
 			next_cipher = Cipher.create_initial_cipher(ciphertext, has_breakpoint, previous_cipher.bp)
 		else:
 			next_cipher = previous_cipher.sample_next_cipher(bp_sample_window)
@@ -193,7 +193,10 @@ def metropolis_hastings(ciphertext: str, has_breakpoint: bool, N: int) -> list:
 
 def decode(ciphertext: str, has_breakpoint: bool) -> str:
 	if has_breakpoint:
-		N = 20000
+		if len(ciphertext) < 1000:
+			N = 50000
+		else:
+			N = 10000
 	else:
 		N = 10000
 	samples = metropolis_hastings(ciphertext, has_breakpoint, N)
