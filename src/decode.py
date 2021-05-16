@@ -192,9 +192,9 @@ def metropolis_hastings(ciphertext: str, has_breakpoint: bool, N: int) -> list:
 
 def decode(ciphertext: str, has_breakpoint: bool) -> str:
 	if has_breakpoint:
-		N = 5000
+		N = 10000
 	else:
-		N = 1000
+		N = 5000
 	samples = metropolis_hastings(ciphertext, has_breakpoint, N)
 	map_estimate = max(samples, key = lambda sample : sample.log_likelihood(ciphertext))
 	plaintext = map_estimate.invert(ciphertext)
