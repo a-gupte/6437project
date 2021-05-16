@@ -192,7 +192,7 @@ def metropolis_hastings(ciphertext: str, has_breakpoint: bool, N: int) -> list:
 
 def decode(ciphertext: str, has_breakpoint: bool) -> str:
 	if has_breakpoint:
-		N = 10000
+		N = 20000
 	else:
 		N = 10000
 	samples = metropolis_hastings(ciphertext, has_breakpoint, N)
