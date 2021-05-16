@@ -40,9 +40,7 @@ class Cipher:
 		self.ciphertext_length = ciphertext_length
 
 	@classmethod
-	def create_initial_cipher(cls, ciphertext: str, has_breakpoint: bool):
-		bp = len(ciphertext) // 2 if has_breakpoint else len(ciphertext)
-
+	def create_initial_cipher(cls, ciphertext: str, has_breakpoint: bool, bp: int):
 		cipherbet_1 = initial_guess_heuristic(ciphertext[:bp])
 		cipherbet_2 = initial_guess_heuristic(ciphertext[bp:])
 
@@ -134,8 +132,8 @@ def metropolis_hastings(ciphertext: str, has_breakpoint: bool, N: int) -> list:
 	# random.shuffle(cipherbet)
 
 	# heuristic cipher depending on letter_probabilities and frequency counts
-	
-	initial_cipher = Cipher.create_initial_cipher(ciphertext, has_breakpoint)
+	bp = len(ciphertext)//2 if has_breakpoint else len(ciphertext)
+	initial_cipher = Cipher.create_initial_cipher(ciphertext, has_breakpoint, bp)
 
 	samples = [initial_cipher]
 
@@ -150,7 +148,10 @@ def metropolis_hastings(ciphertext: str, has_breakpoint: bool, N: int) -> list:
 		# 	acceptances = 0.0
 		previous_cipher = samples[-1]
 		bp_sample_window = len(ciphertext)//(n//100 + 1)//10
-		next_cipher = previous_cipher.sample_next_cipher(bp_sample_window)
+		if n % 100 == 0 and has_breakpoint:
+			next_cipher = Cipher.create_initial_cipher(ciphertext, has_breakpoint, previous_cipher.bp)
+		else:
+			next_cipher = previous_cipher.sample_next_cipher(bp_sample_window)
 		log_acceptance_factor = min(0.0, next_cipher.log_likelihood(ciphertext) - previous_cipher.log_likelihood(ciphertext))
 		u = np.random.binomial(1.0, 10.0 ** log_acceptance_factor)
 
