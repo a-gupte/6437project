@@ -95,18 +95,21 @@ def encode_with_breakpoint(plaintext: str) -> Tuple[str, int]:
 
 
 def main():
-    plaintext_out = sys.argv[1]
+    plaintext_in = sys.argv[1]
     ciphertext_out = sys.argv[2]
     has_breakpoint = (sys.argv[3].lower() == "true")
     if len(sys.argv) > 4:
         random.seed(sys.argv[4])
 
-    raw_text = sys.stdin.read()
+    # raw_text = sys.stdin.read()
 
-    plaintext = clean_text(raw_text)
-    print(f"Clean plaintext length: {len(plaintext)}")
-    with open(plaintext_out, "w") as f:
-        f.write(plaintext)
+    # plaintext = clean_text(raw_text)
+    # print(f"Clean plaintext length: {len(plaintext)}")
+    with open(plaintext_in, "r") as f:
+        plaintext = f.read()
+        plaintext = clean_text(plaintext)
+        f.close()
+    print(len(plaintext))
 
     if has_breakpoint:
         print("Encoding with breakpoint...")
